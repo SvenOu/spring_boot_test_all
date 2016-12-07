@@ -1,0 +1,123 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+dependencies {
+    compile fileTree(dir: "src/main/webapp/WEB-INF/lib", include: '*.jar')
+
+
+    compile group: 'org.springframework', name: 'spring-aspects', version: '4.3.4.RELEASE'
+    compile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.3.2'
+
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile group: 'org.apache.tomcat', name: 'tomcat-juli', version: property('tomcatVersion')
+//    compile 'org.springframework.boot:spring-boot-starter-security'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+
+def libBasePath = "../spring_boot_test_lib";
+def libPackagePath = "com/example/svlib";
+
+def tempJarDir = 'dist'
+def destinationJarDir = 'src/main/webapp/WEB-INF/lib'
+
+//war {
+//    baseName = 'spring_boot_test'
+//    version = '0.0.1-SNAPSHOT'
+//    rootSpec.exclude("**/${libPackagePath}/**", "**/org/springframework/boot/loader/**")
+//}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += files("${libBasePath}/src/main/java/")
+        }
+        resources{
+            srcDirs += [
+                    "${libBasePath}/src/main/java/",
+                    "${libBasePath}/src/main/resources/",
+                    "src/main/java/",
+                    "src/main/resources/"
+            ];
+            exclude("*.java", "*.jar")
+        }
+    }
+    test {
+        java {
+            srcDirs += files("${libBasePath}/src/test/java/")
+        }
+        resources{
+            srcDirs += [
+                    "${libBasePath}/src/main/java/",
+                    "${libBasePath}/src/main/resources/",
+                    "src/main/java/",
+                    "src/main/resources/"
+            ];
+            exclude("*.java", "*.jar")
+        }
+    }
+}
+
+configurations {
+    providedRuntime
+}
+
+task buildLibJar(type: Jar, dependsOn: compileJava) {
+    baseName 'z-tts-gueststar-lib'
+    version '0.1.20'
+    extension 'jar'
+    appendix ''
+    classifier ''
+    from(sourceSets.main.output, {
+//        include 'changelogs.txt'
+//        include 'com/tts/gs/**'
+//        include 'com/tts/birpt/**'
+//        include 'com/tts/util/**'
+//        include 'com/tts/swagger/**'
+//        include 'com/tts/bugfile/**'
+//        include 'com/tts/custompush/**'
+//        include 'com/tts/appupdate/**'
+//        include 'com/tts/birpt/templates/**'
+        include "${libPackagePath}/**"
+    })
+    destinationDir new File(destinationJarDir)
+}
+
+task deleteOldLibJar(type: Delete) {
+    delete (
+            fileTree(dir: destinationJarDir ,
+                    include: "${buildLibJar.baseName}-*.jar",
+                    exclude :"${buildLibJar.archiveName}"),
+
+            fileTree(dir: tempJarDir ,
+                    include: "${buildLibJar.baseName}-*.jar",
+                    exclude :"${buildLibJar.archiveName}")
+    )
+}
+
+task cleanOriginalFiles (type: Delete){
+    delete (
+            fileTree(dir: destinationJarDir ,
+                    include: "${buildLibJar.baseName}-*.jar.original"),
+
+            fileTree(dir: tempJarDir ,
+                    include: "${buildLibJar.baseName}-*.jar.original")
+    )
+}
+
+
+task copyLibJarToDist(type:Copy) {
+    copy {
+        from  "${destinationJarDir}/${buildLibJar.archiveName}"
+        into  "${tempJarDir}"
+    }
+}
+
+//war.dependsOn buildLibJar
+compileJava.dependsOn deleteOldLibJar
+build.finalizedBy(copyLibJarToDist)
+copyLibJarToDist.dependsOn cleanOriginalFiles
+test.onlyIf {gradle.runTestOnBuild}

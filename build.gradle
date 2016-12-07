@@ -1,0 +1,53 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.2.RELEASE'
+
+        //生产服务器版本
+        tomcatVersion = '8.0.24'
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath 'com.bmuschko:gradle-tomcat-plugin:2.2.5'
+    }
+}
+gradle.ext.runTestOnBuild = false
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+/*
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+//        classpath 'com.bmuschko:gradle-tomcat-plugin:2.2.5'
+    }
+}
+
+allprojects {
+    repositories {
+//        jcenter()
+//        mavenLocal()
+        mavenCentral()
+    }
+}
+
+gradle.ext.runTestOnBuild = false
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    compileJava {options.encoding = "UTF-8"}
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+*/
+
