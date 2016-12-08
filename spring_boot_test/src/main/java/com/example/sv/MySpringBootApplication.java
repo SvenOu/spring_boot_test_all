@@ -16,7 +16,8 @@ import org.springframework.context.annotation.FilterType;
 //@Configuration
 //@EnableAutoConfiguration(exclude = {DispatcherServletAutoConfiguration.class})
 @EnableAutoConfiguration
-@ComponentScan(basePackages = {"com.example.sv"},
+@ComponentScan(basePackages = {"com.example.sv"}
+		,
 		// To avoid config conflict
 		excludeFilters={@ComponentScan.Filter(type = FilterType.ASPECTJ, pattern = {
 				"com.example.sv.mobile.configs.*",

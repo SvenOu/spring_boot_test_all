@@ -2,12 +2,15 @@ package com.example.sv.configs;
 
 import com.example.sv.mobile.configs.SpringMobile;
 import com.example.sv.web.configs.SpringMVC;
+import org.springframework.boot.web.filter.OrderedCharacterEncodingFilter;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletContext;
@@ -15,19 +18,21 @@ import javax.servlet.ServletContext;
 @Configuration
 @ImportResource(value = {"classpath:test_config1.xml", "classpath:com/example/sv/test_config2.xml"})
 public class GlobalConfig {
+
     @Bean
     public SomeBean provideSomeBean(){
         return new SomeBean("test some bean.");
     }
 
-    @SuppressWarnings("SpringJavaAutowiringInspection")
     @Bean
-    public ServletRegistrationBean springMvc(ServletContext servletContext) {
+    public ServletRegistrationBean springMvc(
+//            WebApplicationContext webApplicationContext
+    ) {
 
         DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
-        applicationContext.register(SpringMVC.class);
-        dispatcherServlet.setApplicationContext(applicationContext);
+        AnnotationConfigWebApplicationContext webApplicationContext = new AnnotationConfigWebApplicationContext();
+        webApplicationContext.register(SpringMVC.class);
+        dispatcherServlet.setApplicationContext(webApplicationContext);
         ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(dispatcherServlet, "/controller/*");
         servletRegistrationBean.setName("spring-mvc");
         servletRegistrationBean.setLoadOnStartup(4);
@@ -45,7 +50,9 @@ public class GlobalConfig {
     }
 
     @Bean
-    public ServletRegistrationBean springMobile() {
+    public ServletRegistrationBean springMobile(
+//            WebApplicationContext webApplicationContext
+     ) {
 //        DispatcherServlet dispatcherServlet = new DispatcherServlet();
 //        AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
 //        applicationContext.register(SpringMobile.class);
